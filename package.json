@@ -1,0 +1,21 @@
+{
+  "name": "nginx-parser",
+  "version": "1.0.0",
+  "description": "Module give's the utiliy to handle nginx configuration file",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nginx",
+    "nodejs",
+    "parser"
+  ],
+  "author": "Coredigix - Abdelhakim Rafik",
+  "license": "ISC",
+  "devDependencies": {
+    "del": "^3.0.0",
+    "gulp": "^4.0.0",
+    "gulp-coffee": "^3.0.2"
+  }
+}
