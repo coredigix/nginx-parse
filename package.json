@@ -1,6 +1,6 @@
 {
-  "name": "nginx-parser",
-  "version": "1.0.0",
+  "name": "nginx-parse",
+  "version": "1.1.0",
   "description": "Module give's the utiliy to handle nginx configuration file",
   "main": "index.js",
   "scripts": {
@@ -12,10 +12,22 @@
     "parser"
   ],
   "author": "Coredigix - Abdelhakim Rafik",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "del": "^3.0.0",
     "gulp": "^4.0.0",
     "gulp-coffee": "^3.0.2"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coredigix/nginx-parse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/coredigix/nginx-parse/issues"
+  },
+  "homepage": "https://github.com/coredigix/nginx-parse#readme"
 }
