@@ -31,27 +31,27 @@ module.exports = function(data) {
 };
 
 _stringFromNode = function(node) {
-  var dir, j, k, key, len, len1, location, nodeString, path, server, val;
+  var dir, j, k, key, len, len1, location, nodeString, obj, path, val;
   nodeString = '';
   indentLevel++;
   for (key in node) {
     val = node[key];
     // val is an array
-    if (Array.isArray(val) && typeof val[0] !== 'object') {
-      for (j = 0, len = val.length; j < len; j++) {
-        dir = val[j];
-        nodeString += _getIndent() + key + ' ' + dir + ';\n';
+    if (Array.isArray(val)) {
+      if (typeof val[0] === 'string') {
+        for (j = 0, len = val.length; j < len; j++) {
+          dir = val[j];
+          nodeString += _getIndent() + (key + ' ' + dir).trim() + ';\n';
+        }
+      } else {
+        for (k = 0, len1 = val.length; k < len1; k++) {
+          obj = val[k];
+          nodeString += _getIndent() + key + ' {\n' + _stringFromNode(obj) + _getIndent() + '}\n';
+        }
       }
     // val is an object
     } else if (typeof val === 'object') {
-      // we are in server block
-      if (key === 'server') {
-        for (k = 0, len1 = val.length; k < len1; k++) {
-          server = val[k];
-          nodeString += _getIndent() + key + ' {\n' + _stringFromNode(server) + _getIndent() + '}\n';
-        }
-      // we are in location block
-      } else if (key === 'location') {
+      if (val._isList) {
         for (path in val) {
           location = val[path];
           nodeString += _getIndent() + key + ' ' + path + ' {\n' + _stringFromNode(location) + _getIndent() + '}\n';
@@ -62,7 +62,7 @@ _stringFromNode = function(node) {
       }
     } else {
       // val is an directive
-      nodeString += _getIndent() + key + ' ' + val + ';\n';
+      nodeString += _getIndent() + (key + ' ' + val).trim() + ';\n';
     }
   }
   indentLevel--;

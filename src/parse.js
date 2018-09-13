@@ -27,7 +27,7 @@ module.exports = function(data) {
 };
 
 _parse = function(data) {
-  var buffer, c, currentObject, i, isComment, json, key, newServer, nodes, obj, path, str, value;
+  var buffer, c, currentObject, i, isComment, json, key, nodes, obj, str, val;
   json = {};
   nodes = [];
   currentObject = json;
@@ -35,44 +35,44 @@ _parse = function(data) {
   isComment = false;
   for (i in data) {
     c = data[i];
-    // check if we are in comment line
+    // we ignore comments
     if (isComment) {
+      // if it is back to line, comment is finished
       if (c === '\n' || c === '\r') {
-        // we are now finished the comment
         isComment = false;
+        buffer = '';
       } else {
         continue;
       }
     }
     switch (c) {
       case '{': // start block
-        str = _strip(buffer);
-        str = str.split(' ');
+        
+        // strip and split buffer
+        str = _strip(buffer).split(' ');
         // get first element as key
         key = str.shift();
-        // handled object
+        // join the rest as value
+        val = str.join(' ').trim();
+        // create or get the object with this key inside current object
         obj = {};
-        // if we are in server block
-        if (key === 'server') {
-          // if there is already an server array get it unless create it 
-          obj = currentObject.hasOwnProperty(key) ? currentObject[key] : currentObject[key] = [];
-          // create new server object
-          newServer = {};
-          // add server to server list
-          obj.push(newServer);
-          // set it as current object
-          obj = newServer;
-        // if we are in location block
-        } else if (key === 'location') {
-          // check if current object has already this key unless add it
-          obj = currentObject.hasOwnProperty(key) ? currentObject[key] : currentObject[key] = {};
-          // location path
-          path = _strip(str.join(' '));
-          // add location path object
-          obj = obj[path] = {};
+        if (currentObject.hasOwnProperty(key)) {
+          if (Array.isArray(currentObject[key])) {
+            currentObject[key].push(obj);
+          } else if (!val) {
+            currentObject[key] = [currentObject[key], obj];
+          } else {
+            obj = currentObject[key];
+          }
         } else {
-          // something other than server and location
           currentObject[key] = obj;
+        }
+        // there is a value so we create two level block
+        if (val) {
+          Object.defineProperty(obj, '_isList', {
+            value: true
+          });
+          obj = obj[val] = {};
         }
         // push current object to nodes
         nodes.push(currentObject);
@@ -81,36 +81,41 @@ _parse = function(data) {
         // clear buffer
         buffer = '';
         break;
-      case '}': // end block
+      case '}': // we arrived to end block
         
         // get last node as current object and remove it from nodes
         currentObject = nodes.pop();
         // clear buffer
         buffer = '';
         break;
-      case ';': // line
+      case ';': // it is line
         
-        // remove tabs form the string
-        str = _strip(buffer);
-        str = str.split(' ');
+        // strip and split buffer
+        str = _strip(buffer).split(' ');
+        
         // get first element as key and remove it form array
         key = _strip(str.shift());
-        // join the rest value with space
-        value = _strip(str.join(' '));
-        // if we are in include directive
-        if (key === 'include') {
-          obj = currentObject.hasOwnProperty(key) ? currentObject[key] : currentObject[key] = [];
-          obj.push(value);
+        // join the rest values with space
+        val = _strip(str.join(' '));
+        // if this key already exist so we need to transform key to array if not yet
+        if (currentObject.hasOwnProperty(key)) {
+          // if key is not an array so we create it
+          if (!Array.isArray(currentObject[key])) {
+            currentObject[key] = [currentObject[key]];
+          }
+          // push value to existing or created array
+          currentObject[key].push(val);
         } else {
           // add to current object
-          currentObject[key] = value;
+
+          // otherwise it is just a sample directive then it is transformed to key:value
+          currentObject[key] = val;
         }
         // clear buffer
         buffer = '';
         break;
-      case '#': //comment
-        // we are in comment line
-        isComment = true; // words
+      case '#': // it is comment
+        isComment = true; // otherwise add to buffer
         break;
       default:
         buffer += c;
