@@ -5,7 +5,7 @@
 * @return {String} Indent
  */
 /**
-* Transform an node to string
+* Transform an JSON node to string
 * @private
 * @param  {Object} node Node object
 * @return {String}      Node as string
@@ -26,7 +26,7 @@ module.exports = function(data) {
   if (typeof data !== 'object') {
     throw new Error('data must be an object');
   }
-  // compile data
+  // we run compiler from data
   return _stringFromNode(data);
 };
 
@@ -38,12 +38,14 @@ _stringFromNode = function(node) {
     val = node[key];
     // val is an array
     if (Array.isArray(val)) {
+      // sample array that contains just strings
       if (typeof val[0] === 'string') {
         for (j = 0, len = val.length; j < len; j++) {
           dir = val[j];
           nodeString += _getIndent() + (key + ' ' + dir).trim() + ';\n';
         }
       } else {
+// array contains object
         for (k = 0, len1 = val.length; k < len1; k++) {
           obj = val[k];
           nodeString += _getIndent() + key + ' {\n' + _stringFromNode(obj) + _getIndent() + '}\n';
@@ -51,6 +53,7 @@ _stringFromNode = function(node) {
       }
     // val is an object
     } else if (typeof val === 'object') {
+      // list representation
       if (val._isList) {
         for (path in val) {
           location = val[path];
